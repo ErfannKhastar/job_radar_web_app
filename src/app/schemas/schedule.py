@@ -47,12 +47,6 @@ class ScheduleCreate(BaseModel):
         default=None, description="Specific precise timestamp for a one-time execution"
     )
 
-    cron_expression: str | None = Field(
-        default=None,
-        max_length=100,
-        description="Advanced cron-style string for complex scheduling patterns",
-    )
-
 
 class ScheduleUpdate(BaseModel):
     """
@@ -72,7 +66,6 @@ class ScheduleUpdate(BaseModel):
     minute: int | None = Field(default=None, ge=0, le=59)
     weekday: int | None = Field(default=None, ge=0, le=6)
     run_once_at: datetime | None = Field(default=None)
-    cron_expression: str | None = Field(default=None, max_length=100)
 
 
 class ScheduleResponse(BaseModel):

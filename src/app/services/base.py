@@ -7,6 +7,6 @@ class BaseService:
     def commit(db: Session, *instances) -> None:
         
         db.commit()
-
-        for instance in instances:
-            db.refresh(instance)
+        if instances:
+            for instance in instances:
+                db.refresh(instance)

@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from src.app.models.schedule import Schedule
 from src.app.schemas.schedule import ScheduleCreate, ScheduleUpdate
+from src.app.core.enums import ScheduleType
 
 
 def create_schedule(
@@ -45,18 +46,29 @@ def create_schedule(
     return schedule
 
 
-def get_schedule_by_id(db: Session, schedule_id: int) -> Schedule | None:
+def get_schedule_by_id(
+    db: Session,
+    schedule_id: int,
+    search_profile_id: int | None = None,
+) -> Schedule | None:
     """
-    Retrieve a specific schedule by its primary key ID.
+    Retrieve a schedule by its ID.
+
+    Optionally restrict the lookup to a specific SearchProfile.
 
     Args:
-        db (Session): The active database session.
-        schedule_id (int): The ID of the schedule.
+        db: Active database session.
+        schedule_id: Schedule ID.
+        search_profile_id: Optional SearchProfile owner.
 
     Returns:
-        Schedule | None: The Schedule ORM object if found, otherwise None.
+        Schedule | None
     """
     stmt = select(Schedule).where(Schedule.id == schedule_id)
+
+    if search_profile_id is not None:
+        stmt = stmt.where(Schedule.search_profile_id == search_profile_id)
+
     return db.scalar(stmt)
 
 
@@ -74,10 +86,39 @@ def get_schedules_by_profile(db: Session, search_profile_id: int) -> list[Schedu
     stmt = (
         select(Schedule)
         .where(Schedule.search_profile_id == search_profile_id)
-        .order_by(Schedule.created_at.desc())
+        .order_by(
+            Schedule.created_at.desc(),
+            Schedule.id.desc(),
+        )
     )
 
     return list(db.scalars(stmt).all())
+
+
+def get_duplicate_schedule(
+    db: Session,
+    search_profile_id: int,
+    schedule_type: ScheduleType,
+    hour: int | None,
+    minute: int | None,
+    weekday: int | None,
+    run_once_at: datetime | None,
+) -> Schedule | None:
+    """
+    Check whether an identical schedule already exists
+    for the given SearchProfile.
+    """
+
+    stmt = select(Schedule).where(
+        Schedule.search_profile_id == search_profile_id,
+        Schedule.schedule_type == schedule_type,
+        Schedule.hour == hour,
+        Schedule.minute == minute,
+        Schedule.weekday == weekday,
+        Schedule.run_once_at == run_once_at,
+    )
+
+    return db.scalar(stmt)
 
 
 def update_schedule(

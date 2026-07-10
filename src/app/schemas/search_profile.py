@@ -81,3 +81,14 @@ class SearchProfileResponse(BaseModel):
 
     # Enable ORM mode for Pydantic V2 to map seamlessly with SQLAlchemy objects
     model_config = ConfigDict(from_attributes=True)
+
+
+class SearchProfileStatusUpdate(BaseModel):
+    """
+    Schema for enabling or disabling a search profile.
+    """
+
+    is_active: bool = Field(
+        ...,
+        description="Desired active status of the search profile.",
+    )
