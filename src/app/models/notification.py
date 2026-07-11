@@ -5,13 +5,13 @@ This module defines the `Notification` entity, responsible for logging
 every attempt the system makes to deliver scraped job data to the user.
 """
 
+from typing import TYPE_CHECKING
 from datetime import datetime
 from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from src.app.db.session import Base
 from src.app.core.enums import NotificationChannel, NotificationStatus
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.app.models.search_run import SearchRun

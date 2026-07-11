@@ -6,13 +6,13 @@ for every time the automation engine executes a scraping task. It tracks
 successes, failures, and the volume of data extracted during that specific run.
 """
 
-from datetime import datetime
-from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql import func
-from src.app.db.session import Base
-from src.app.core.enums import SearchRunStatus
 from typing import TYPE_CHECKING
+from datetime import datetime
+from sqlalchemy.sql import func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Integer, String
+from src.app.core.enums import SearchRunStatus
+from src.app.db.session import Base
 
 if TYPE_CHECKING:
     from src.app.models.search_profile import SearchProfile
@@ -85,3 +85,18 @@ class SearchRun(Base):
         back_populates="search_run",
         cascade="all, delete-orphan",
     )
+
+    @property
+    def duration_seconds(self) -> float | None:
+        """
+        Calculate the execution duration in seconds.
+
+        Returns:
+            float | None: Duration in seconds if the run has finished,
+            otherwise None.
+        """
+
+        if self.finished_at is None:
+            return None
+
+        return (self.finished_at - self.started_at).total_seconds()
